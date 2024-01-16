@@ -62,6 +62,23 @@ namespace
 #endif // WITH_EDITOR
 }
 
+
+void FImGuiContextManager::LoadCustomFont(ULevel* Level, UWorld* World)
+{
+	SetCustomFont(Settings.GetCustomFontSetting());
+	FWorldDelegates::LevelAddedToWorld.Remove(LoadCustomFontHandle);
+}
+
+void FImGuiContextManager::OnCustomFontChanged(const FCustomFontSetting& CustomFontSetting)
+{
+	//TODO Hot Reload Custom Font
+	// if (LoadCustomFontHandle.IsValid())
+	// {
+	// 	FWorldDelegates::LevelAddedToWorld.Remove(LoadCustomFontHandle);
+	// }
+	// LoadCustomFontHandle=FWorldDelegates::LevelAddedToWorld.AddRaw(this,&FImGuiContextManager::LoadCustomFont);
+}
+
 FImGuiContextManager::FImGuiContextManager(FImGuiModuleSettings& InSettings)
 	: Settings(InSettings)
 {
@@ -74,6 +91,8 @@ FImGuiContextManager::FImGuiContextManager(FImGuiModuleSettings& InSettings)
 #if ENGINE_COMPATIBILITY_WITH_WORLD_POST_ACTOR_TICK
 	FWorldDelegates::OnWorldPostActorTick.AddRaw(this, &FImGuiContextManager::OnWorldPostActorTick);
 #endif
+	// Settings.OnCustomFontChangedDelegate.AddRaw(this,&FImGuiContextManager::OnCustomFontChanged);
+	LoadCustomFontHandle=FWorldDelegates::LevelAddedToWorld.AddRaw(this,&FImGuiContextManager::LoadCustomFont);
 }
 
 FImGuiContextManager::~FImGuiContextManager()
@@ -85,6 +104,7 @@ FImGuiContextManager::~FImGuiContextManager()
 #if ENGINE_COMPATIBILITY_WITH_WORLD_POST_ACTOR_TICK
 	FWorldDelegates::OnWorldPostActorTick.RemoveAll(this);
 #endif
+	// Settings.OnCustomFontChangedDelegate.RemoveAll(this);
 }
 
 void FImGuiContextManager::Tick(float DeltaSeconds)
@@ -288,6 +308,20 @@ void FImGuiContextManager::BuildFontAtlas(const TMap<FName, TSharedPtr<ImFontCon
 
 		OnFontAtlasBuilt.Broadcast();
 	}
+}
+
+void FImGuiContextManager::SetCustomFont(const FCustomFontSetting& CustomFontSetting)
+{
+	if (CustomFontSetting.font == nullptr)
+	{
+		return;
+	}
+	ImGuiIO& io=ImGui::GetIO();
+	ImFont* Font=FontAtlas.AddFontFromFileTTF(TCHAR_TO_UTF8(*CustomFontSetting.font->GetFontFilename()),CustomFontSetting.FontSize,nullptr,FontAtlas.GetGlyphRangesChineseFull());
+	io.FontDefault = Font;
+	RebuildFontAtlas();
+
+	UE_LOG(LogTemp,Error,TEXT("Load Custom Font!"));
 }
 
 void FImGuiContextManager::RebuildFontAtlas()

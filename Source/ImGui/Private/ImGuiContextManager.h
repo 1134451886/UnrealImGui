@@ -6,6 +6,7 @@
 #include "VersionCompatibility.h"
 
 
+struct FCustomFontSetting;
 class FImGuiModuleSettings;
 struct FImGuiDPIScaleInfo;
 
@@ -21,7 +22,8 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FContextProxyCreatedDelegate, int32, FImGui
 class FImGuiContextManager
 {
 public:
-
+	void LoadCustomFont(ULevel* Level, UWorld* World);
+	void OnCustomFontChanged(const FCustomFontSetting& CustomFontSetting);
 	FImGuiContextManager(FImGuiModuleSettings& InSettings);
 
 	FImGuiContextManager(const FImGuiContextManager&) = delete;
@@ -84,6 +86,8 @@ private:
 		TUniquePtr<FImGuiContextProxy> ContextProxy;
 	};
 
+	FDelegateHandle LoadCustomFontHandle;
+
 #if ENGINE_COMPATIBILITY_LEGACY_WORLD_ACTOR_TICK
 	void OnWorldTickStart(ELevelTick TickType, float DeltaSeconds);
 #endif
@@ -105,6 +109,7 @@ private:
 
 	void SetDPIScale(const FImGuiDPIScaleInfo& ScaleInfo);
 	void BuildFontAtlas(const TMap<FName, TSharedPtr<ImFontConfig>>& CustomFontConfigs = {});
+	void SetCustomFont(const FCustomFontSetting& CustomFontSetting);
 
 	TMap<int32, FContextData> Contexts;
 

@@ -10,6 +10,8 @@
 #include <Styling/SlateTypes.h>
 #include <UObject/Object.h>
 
+#include "Engine/FontFace.h"
+
 // We use FSoftClassPath, which is supported by older and newer engine versions. Starting from 4.18, it is
 // a typedef of FSoftClassPath, which is also recognized by UHT.
 #if ENGINE_COMPATIBILITY_LEGACY_STRING_CLASS_REF
@@ -21,6 +23,8 @@
 #include "ImGuiModuleSettings.generated.h"
 
 
+struct FCustomFontSetting;
+class UFontFace;
 /**
  * Struct containing key information that can be used for key binding. Using 'Undetermined' value for modifier keys
  * means that those keys should be ignored when testing for a match.
@@ -154,6 +158,21 @@ private:
 	float CalculateResolutionBasedScale() const;
 };
 
+//Custom Font Settings
+USTRUCT()
+struct FCustomFontSetting
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere,DisplayName="当前字体",meta=(ToolTip="修改当前字体需重启编辑器生效"))
+	UFontFace* font;
+
+	UPROPERTY(EditAnywhere,DisplayName="字体大小")
+	int FontSize;
+
+};
+
 // UObject used for loading and saving ImGui settings. To access actual settings use FImGuiModuleSettings interface.
 UCLASS(config=ImGui, defaultconfig)
 class UImGuiSettings : public UObject
@@ -218,11 +237,13 @@ protected:
 	UPROPERTY(EditAnywhere, config, Category = "DPI Scale", Meta = (ShowOnlyInnerProperties))
 	FImGuiDPIScaleInfo DPIScale;
 
+	UPROPERTY(EditAnywhere,Config,Category="字体设置",meta=(ShowOnlyInnerProperties))
+	FCustomFontSetting CustomFontSetting;
+
 	static UImGuiSettings* DefaultInstance;
 
 	friend class FImGuiModuleSettings;
 };
-
 
 class FImGuiModuleCommands;
 class FImGuiModuleProperties;
@@ -239,6 +260,7 @@ public:
 	DECLARE_MULTICAST_DELEGATE_OneParam(FStringClassReferenceChangeDelegate, const FSoftClassPath&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FImGuiCanvasSizeInfoChangeDelegate, const FImGuiCanvasSizeInfo&);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FImGuiDPIScaleInfoChangeDelegate, const FImGuiDPIScaleInfo&);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FCustomFontChangeDelegate, const FCustomFontSetting&);
 
 	// Constructor for ImGui module settings. It will bind to instances of module properties and commands and will
 	// update them every time when settings are changed.
@@ -267,6 +289,9 @@ public:
 	// Get the DPI Scale information.
 	const FImGuiDPIScaleInfo& GetDPIScaleInfo() const { return DPIScale; }
 
+	// Get Custom Font Info
+	const FCustomFontSetting& GetCustomFontSetting() const { return CustomFontSetting; }
+
 	// Delegate raised when ImGui Input Handle is changed.
 	FStringClassReferenceChangeDelegate OnImGuiInputHandlerClassChanged;
 
@@ -278,6 +303,8 @@ public:
 
 	// Delegate raised when the DPI scale is changed.
 	FImGuiDPIScaleInfoChangeDelegate OnDPIScaleChangedDelegate;
+
+	FCustomFontChangeDelegate OnCustomFontChangedDelegate;
 
 private:
 
@@ -293,6 +320,7 @@ private:
 	void SetToggleInputKey(const FImGuiKeyInfo& KeyInfo);
 	void SetCanvasSizeInfo(const FImGuiCanvasSizeInfo& CanvasSizeInfo);
 	void SetDPIScaleInfo(const FImGuiDPIScaleInfo& ScaleInfo);
+	void SetCustomFont(const FCustomFontSetting& InCustomFontSetting);
 
 #if WITH_EDITOR
 	void OnPropertyChanged(class UObject* ObjectBeingModified, struct FPropertyChangedEvent& PropertyChangedEvent);
@@ -305,6 +333,7 @@ private:
 	FImGuiKeyInfo ToggleInputKey;
 	FImGuiCanvasSizeInfo CanvasSize;
 	FImGuiDPIScaleInfo DPIScale;
+	FCustomFontSetting CustomFontSetting;
 	bool bShareKeyboardInput = false;
 	bool bShareGamepadInput = false;
 	bool bShareMouseInput = false;

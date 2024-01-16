@@ -117,6 +117,7 @@ void FImGuiModuleSettings::UpdateSettings()
 		SetUseSoftwareCursor(SettingsObject->bUseSoftwareCursor);
 		SetToggleInputKey(SettingsObject->ToggleInput);
 		SetCanvasSizeInfo(SettingsObject->CanvasSize);
+		SetCustomFont(SettingsObject->CustomFontSetting);
 	}
 }
 
@@ -195,6 +196,13 @@ void FImGuiModuleSettings::SetDPIScaleInfo(const FImGuiDPIScaleInfo& ScaleInfo)
 {
 	DPIScale = ScaleInfo;
 	OnDPIScaleChangedDelegate.Broadcast(DPIScale);
+}
+
+void FImGuiModuleSettings::SetCustomFont(const FCustomFontSetting& InCustomFontSetting)
+{
+	CustomFontSetting=InCustomFontSetting;
+
+	OnCustomFontChangedDelegate.Broadcast(CustomFontSetting);
 }
 
 #if WITH_EDITOR
