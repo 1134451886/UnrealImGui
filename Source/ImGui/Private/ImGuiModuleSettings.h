@@ -166,10 +166,10 @@ struct FCustomFontSetting
 
 public:
 	UPROPERTY(EditAnywhere,DisplayName="当前字体",meta=(ToolTip="修改当前字体需重启编辑器生效"))
-	UFontFace* font;
+	UFontFace* font=nullptr;
 
 	UPROPERTY(EditAnywhere,DisplayName="字体大小")
-	int FontSize;
+	int FontSize=24;
 
 };
 

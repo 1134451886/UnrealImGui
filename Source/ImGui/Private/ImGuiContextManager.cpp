@@ -320,8 +320,6 @@ void FImGuiContextManager::SetCustomFont(const FCustomFontSetting& CustomFontSet
 	ImFont* Font=FontAtlas.AddFontFromFileTTF(TCHAR_TO_UTF8(*CustomFontSetting.font->GetFontFilename()),CustomFontSetting.FontSize,nullptr,FontAtlas.GetGlyphRangesChineseFull());
 	io.FontDefault = Font;
 	RebuildFontAtlas();
-
-	UE_LOG(LogTemp,Error,TEXT("Load Custom Font!"));
 }
 
 void FImGuiContextManager::RebuildFontAtlas()
